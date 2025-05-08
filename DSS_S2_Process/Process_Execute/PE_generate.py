@@ -241,12 +241,12 @@ def main():
     gaussian_contour = np.array(smooth_points, dtype=np.int32).reshape((-1, 1, 2))
     cv2.polylines(gausian_1D_image, [gaussian_contour], isClosed=True, color=(0, 0, 255), thickness=1)
     cv2.imshow("Gaussian 1D", gausian_1D_image)
-    # Lưu và hiển thị kết quả
-    # cv2.imwrite(str(point_on_segment_path), image_seg)
-    # cv2.imwrite(str(mask_path), mask)
-    # cv2.imshow("image", image)
-    # cv2.imshow("Extreme Points Result", image_seg)
-    # cv2.imshow("Extreme Points Mask", mask)
+    #Lưu và hiển thị kết quả
+    cv2.imwrite(str(point_on_segment_path), image_seg)
+    cv2.imwrite(str(mask_path), mask)
+    cv2.imshow("image", image)
+    cv2.imshow("Extreme Points Result", image_seg)
+    cv2.imshow("Extreme Points Mask", mask)
     contour = np.array(new_points, dtype=np.int32).reshape((-1, 1, 2))
     cv2.polylines(original_image, [contour], isClosed= True , color=(0, 0, 255), thickness=1)
     cv2.imshow("image_process",original_image)

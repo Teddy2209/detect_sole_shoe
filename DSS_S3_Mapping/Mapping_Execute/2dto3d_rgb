@@ -1,0 +1,48 @@
+import cv2
+import numpy as np
+import open3d as o3d
+import re
+from sklearn.neighbors import KDTree
+
+# --- Cấu hình ---
+ply_file = r"D:\Python\DetectSoleShoe\DSS_S3_Mapping\f\3D.ply"
+color_img_path = r"D:\Python\DetectSoleShoe\DSS_S3_Mapping\f\imgTexture1.bmp"  # ảnh 2D
+yolo_txt = r"D:\Python\DetectSoleShoe\DSS_S2_Process\Process_Result\S2_Process_Result_point\imgTexture1NEW.txt"
+output_ply = r"D:\Python\DetectSoleShoe\DSS_S3_Mapping\Mapping_Result.ply"
+
+# --- Bước 1: Đọc ảnh và điểm 2D ---
+img = cv2.imread(color_img_path)
+if img is None:
+    raise FileNotFoundError("Không tìm thấy ảnh 2D")
+
+points_uv = []
+with open(yolo_txt, 'r') as f:
+    for line in f:
+        tokens = re.split(r'[,\s]+', line.strip())
+        if len(tokens) >= 2:
+            u, v = map(int, map(float, tokens[:2]))
+            if 0 <= v < img.shape[0] and 0 <= u < img.shape[1]:
+                color = img[v, u]  # Lưu ý: OpenCV dùng (v,u), màu BGR
+                points_uv.append((u, v, color[::-1] / 255.0))  # Chuyển sang RGB + chuẩn hóa
+
+# --- Bước 2: Đọc point cloud có RGB ---
+pcd = o3d.io.read_point_cloud(ply_file)
+colors = np.asarray(pcd.colors)
+points = np.asarray(pcd.points)
+
+# --- Bước 3: Dùng KDTree để tìm điểm 3D gần màu nhất ---
+tree = KDTree(colors)
+mapped_points = []
+
+for _, _, rgb in points_uv:
+    dist, idx = tree.query([rgb], k=1)
+    mapped_points.append(points[idx[0][0]])
+
+# --- Bước 4: Xuất point cloud kết quả ---
+mapped_pcd = o3d.geometry.PointCloud()
+mapped_pcd.points = o3d.utility.Vector3dVector(np.array(mapped_points))
+o3d.io.write_point_cloud(output_ply, mapped_pcd)
+print(f"✅ Đã lưu {len(mapped_points)} điểm 3D từ YOLO vào: {output_ply}")
+
+# Hiển thị kết quả
+o3d.visualization.draw_geometries([mapped_pcd])

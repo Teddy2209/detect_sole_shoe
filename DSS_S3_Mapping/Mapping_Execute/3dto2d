@@ -1,0 +1,38 @@
+import open3d as o3d
+import numpy as np
+import cv2
+
+# --- Cấu hình ---
+ply_file = r"D:\Python\DetectSoleShoe\DSS_S3_Mapping\f\3D.ply"  # Đường dẫn file .ply
+output_image_path = r"DSS_S3_Mapping\Mapping_Result.jpg"   # Ảnh 2D đầu ra
+image_width, image_height = 1920, 1080  # Kích thước ảnh đầu ra (chỉnh theo ảnh 2D gốc từ AccuPick)
+
+# --- Ma trận nội tại từ file .yaml (intrinsicMat1) ---
+K = np.array([
+    [2617.459, 0.0,     959.9446],
+    [0.0,      2616.388, 614.0594],
+    [0.0,      0.0,       1.0    ]
+])
+
+# --- Đọc point cloud ---
+pcd = o3d.io.read_point_cloud(ply_file)
+points = np.asarray(pcd.points)
+colors = np.asarray(pcd.colors)
+
+# --- Tạo ảnh trống ---
+image = np.zeros((image_height, image_width, 3), dtype=np.uint8)
+
+# --- Chiếu từng điểm 3D về mặt phẳng ảnh 2D ---
+for pt, color in zip(points, colors):
+    X, Y, Z = pt
+    if Z <= 0 or np.isnan(Z):
+        continue
+    uv = K @ np.array([X, Y, Z])
+    u = int(round(uv[0] / uv[2]))
+    v = int(round(uv[1] / uv[2]))
+    if 0 <= u < image_width and 0 <= v < image_height:
+        image[v, u] = (np.clip(color * 255, 0, 255)).astype(np.uint8)[::-1]  # RGB -> BGR
+
+# --- Lưu ảnh ---
+cv2.imwrite(output_image_path, image)
+print(f"✅ Ảnh 2D đã được lưu tại: {output_image_path}")

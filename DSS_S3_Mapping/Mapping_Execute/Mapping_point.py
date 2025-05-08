@@ -4,16 +4,16 @@ import open3d as o3d
 import re
 
 # --- Cấu hình ---
-depth_path = r'D:\Python\DetectSoleShoe\DSS_S3_Mapping\e\imgTexture1.bmp'      # Ảnh depth
+depth_path = r'D:\Python\DetectSoleShoe\DSS_S3_Mapping\f\imgTexture1.bmp'      # Ảnh depth
 segment_txt = r'D:\Python\DetectSoleShoe\DSS_S2_Process\Process_Result\S2_Process_Result_gaussian_point\imgTexture1NEW.txt'  # File chứa các điểm YOLO segment
-image = r"D:\Python\DetectSoleShoe\DSS_S3_Mapping\e\3D.ply"
+image = r"D:\Python\DetectSoleShoe\DSS_S3_Mapping\f\3D.ply"
 output_ply = r'D:\Python\DetectSoleShoe\DSS_S3_Mapping\Mapping_Result.ply'       # File xuất 3D
 depth_scale = 1.0                   # Nếu ảnh depth theo mm thì chia /1000
 
 # Ma trận nội tại (intrinsicMat1 trong file .yaml)
 K = np.array(
- [  [2992.8456933,     0,          952.12107631],
-    [   0,         2984.68047628 , 648.74729372],
+ [  [2617.4594203933116,     0,          959.94456887453816],
+    [   0,         2616.38765193043318 ,  614.05935905529157],
     [   0,            0,          1,       ]
     ])
 

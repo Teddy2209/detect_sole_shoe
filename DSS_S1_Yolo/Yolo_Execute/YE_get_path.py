@@ -3,7 +3,7 @@ from pathlib import Path
 def get_paths():
     base_dir = Path(__file__).parent
     model_path = base_dir.parent /"Yolo_best_file"/ "best_seg_24_4_25.pt"
-    image_path = base_dir.parent.parent / "DSS_S3_Mapping" /"e"/ "imgTexture1.bmp"
+    image_path = base_dir.parent.parent / "DSS_S3_Mapping" /"f"/ "imgTexture1.bmp"
 # tạo path lưu ảnh
     original_image_stem = image_path.stem
     original_image_suffix = image_path.suffix
