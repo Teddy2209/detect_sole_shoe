@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>✦ FlashCard Pro</title>
+<style>
+:root{
+  --bg:#f0f4f8;--sur:#fff;--sur2:#f7f9fc;--bor:#e2e8f0;
+  --tx:#1a202c;--tx2:#4a5568;--mu:#718096;
+  --ac:#667eea;--ac2:#764ba2;--dan:#fc5c7d;--ok:#43e97b;
+  --sh:0 18px 50px rgba(0,0,0,.12);--sh2:0 4px 16px rgba(0,0,0,.08);
+  --r:20px;--r2:14px;--tr:all .26s cubic-bezier(.4,0,.2,1);
+}
+[data-theme=dark]{
+  --bg:#0d0d1a;--sur:#191930;--sur2:#12122a;--bor:#2d2d4e;
+  --tx:#e8eaf6;--tx2:#b0b8d8;--mu:#7986cb;
+  --sh:0 18px 50px rgba(0,0,0,.5);--sh2:0 4px 16px rgba(0,0,0,.4);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s;-webkit-tap-highlight-color:transparent}
+button{cursor:pointer;border:none;background:none;touch-action:manipulation;font-family:inherit;-webkit-tap-highlight-color:transparent}
+input,textarea,select{font-family:inherit;-webkit-appearance:none;font-size:inherit}
+button *{pointer-events:none}
+
+/* SCREENS */
+.scr{display:none;flex-direction:column;align-items:center;min-height:100vh;width:100%}
+.scr.on{display:flex}
+
+/* TOP BAR */
+.tbar{width:100%;max-width:560px;padding:13px 16px 9px;display:flex;align-items:center;gap:9px;position:sticky;top:0;z-index:20;background:var(--bg);transition:background .3s}
+.ico-btn{width:40px;height:40px;border-radius:50%;background:var(--sur);box-shadow:var(--sh2);display:flex;align-items:center;justify-content:center;font-size:1.05rem;flex-shrink:0;transition:var(--tr)}
+.ico-btn:active{transform:scale(.85)}
+.tbar-title{flex:1;font-size:1.05rem;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grad{background:linear-gradient(135deg,var(--ac),var(--ac2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#43e97b;flex-shrink:0}
+.sync-dot.off{background:var(--mu)}
+.sync-dot.ing{background:var(--ac);animation:blink .8s ease infinite alternate}
+.sync-dot.err{background:var(--dan)}
+@keyframes blink{to{opacity:.2}}
+
+/* CONTENT */
+.cont{width:100%;max-width:560px;padding:0 14px 100px;flex:1}
+
+/* HERO */
+.hero{margin:6px 0 16px;background:linear-gradient(135deg,var(--ac),var(--ac2));border-radius:var(--r);padding:17px 18px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 8px 28px rgba(102,126,234,.42);cursor:pointer;transition:var(--tr);touch-action:manipulation}
+.hero:active{transform:scale(.97)}
+.hero h2{font-size:1.05rem;font-weight:800;color:#fff;margin-bottom:3px}
+.hero p{font-size:.77rem;color:rgba(255,255,255,.82)}
+.hero span{font-size:2.3rem}
+
+/* SEC */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.sec-t{font-size:.9rem;font-weight:700;color:var(--tx2)}
+.chip{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;border-radius:99px;padding:7px 15px;font-size:.78rem;font-weight:700;box-shadow:0 4px 12px rgba(102,126,234,.38);transition:var(--tr);touch-action:manipulation}
+.chip:active{transform:scale(.93)}
+
+/* CATEGORY CARDS */
+.cat-list{display:flex;flex-direction:column;gap:9px}
+.cat-card{background:var(--sur);border-radius:var(--r2);padding:13px;box-shadow:var(--sh2);display:flex;align-items:center;gap:11px;cursor:pointer;transition:var(--tr);touch-action:manipulation}
+.cat-card:active{transform:scale(.98)}
+.cdot{width:43px;height:43px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0}
+.ci{flex:1;min-width:0}
+.ci-name{font-size:.93rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ci-meta{font-size:.73rem;color:var(--mu);margin-top:2px}
+.ci-meta b{color:var(--dan)}
+.cacts{display:flex;gap:5px;flex-shrink:0}
+.sm-btn{width:33px;height:33px;border-radius:9px;background:var(--sur2);display:flex;align-items:center;justify-content:center;font-size:.9rem;transition:var(--tr);touch-action:manipulation}
+.sm-btn:active{transform:scale(.82)}
+
+/* WORD LIST */
+.wlist{display:flex;flex-direction:column;gap:8px}
+.witem{background:var(--sur);border-radius:var(--r2);padding:12px;box-shadow:var(--sh2);display:flex;align-items:center;gap:10px}
+.wi{flex:1;min-width:0}
+.wi-w{font-size:.93rem;font-weight:700}
+.wi-ipa{font-size:.76rem;color:var(--tx2);font-style:italic;font-weight:600;margin:2px 0}
+.wi-m{font-size:.78rem;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wi-f{font-size:.69rem;color:var(--dan);font-weight:700;margin-top:2px}
+
+/* STATS */
+.mstats{display:flex;gap:7px;margin-bottom:13px}
+.mst{flex:1;background:var(--sur);border-radius:11px;padding:9px 5px;text-align:center;box-shadow:var(--sh2)}
+.mst .v{font-size:1.25rem;font-weight:800}
+.mst .l{font-size:.63rem;color:var(--mu);margin-top:2px}
+.mst.tot .v{color:var(--ac)}
+.mst.ok  .v{color:var(--ok)}
+.mst.bad .v{color:var(--dan)}
+
+.add-w-btn{width:100%;background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;border-radius:var(--r2);padding:12px;font-size:.9rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 5px 17px rgba(102,126,234,.36);margin-bottom:13px;transition:var(--tr);touch-action:manipulation}
+.add-w-btn:active{transform:scale(.97)}
+
+/* EMPTY */
+.empty{text-align:center;padding:45px 18px}
+.empty .ei{font-size:3.2rem;margin-bottom:11px}
+.empty .et{font-size:1rem;font-weight:700;margin-bottom:7px}
+.empty .es{font-size:.85rem;color:var(--mu);line-height:1.65}
+
+/* MODALS */
+.mov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.56);z-index:200;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.mov.on{display:flex}
+.mbox{background:var(--sur);width:100%;max-width:560px;border-radius:22px 22px 0 0;padding:18px 16px 34px;max-height:90vh;overflow-y:auto;animation:up .3s cubic-bezier(.4,0,.2,1)}
+@keyframes up{from{transform:translateY(45px);opacity:0}to{transform:translateY(0);opacity:1}}
+.mh{width:36px;height:4px;background:var(--bor);border-radius:99px;margin:0 auto 16px}
+.mt{font-size:1.05rem;font-weight:800;margin-bottom:16px}
+.fg{margin-bottom:11px}
+.fl{font-size:.78rem;font-weight:600;color:var(--tx2);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.fi{width:100%;background:var(--sur2);border:1.5px solid var(--bor);border-radius:10px;padding:10px 12px;color:var(--tx);font-size:.9rem;outline:none;transition:border-color .2s}
+.fi:focus{border-color:var(--ac)}
+.fi:disabled{opacity:.45}
+textarea.fi{resize:none;min-height:68px}
+.fi-row{display:flex;gap:7px}
+.fi-row .fi{flex:1}
+.ai-btn{flex-shrink:0;width:44px;border-radius:10px;background:linear-gradient(135deg,var(--ac),var(--ac2));display:flex;align-items:center;justify-content:center;font-size:1.15rem;box-shadow:0 4px 13px rgba(102,126,234,.38);transition:var(--tr);touch-action:manipulation}
+.ai-btn:active{transform:scale(.88)}
+.ai-btn:disabled{opacity:.4;pointer-events:none}
+.ai-ldr{display:none;align-items:center;justify-content:center;gap:8px;background:var(--sur2);border:1.5px solid var(--bor);border-radius:10px;padding:12px;font-size:.82rem;color:var(--mu);margin-bottom:11px}
+.ai-ldr.on{display:flex}
+.ai-tag{font-size:.62rem;padding:2px 6px;border-radius:99px;background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;font-weight:700}
+.auto-lbl{font-size:.63rem;color:var(--ac);display:none;margin-left:3px}
+.spin{width:15px;height:15px;border:2.5px solid var(--bor);border-top-color:var(--ac);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.emoji-row{display:flex;gap:7px;flex-wrap:wrap}
+.emo{width:36px;height:36px;border-radius:9px;background:var(--sur2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;transition:var(--tr);border:2px solid transparent;touch-action:manipulation}
+.emo.on{background:rgba(102,126,234,.15);border-color:var(--ac)}
+.clr-row{display:flex;gap:8px;flex-wrap:wrap}
+.clr{width:28px;height:28px;border-radius:50%;cursor:pointer;transition:var(--tr);border:3px solid transparent;touch-action:manipulation}
+.clr.on{border-color:var(--tx);transform:scale(1.18)}
+.mfoot{display:flex;gap:9px;margin-top:16px}
+.btn-c{flex:1;padding:12px;border-radius:var(--r2);background:var(--sur2);color:var(--mu);font-size:.88rem;font-weight:700;transition:var(--tr);touch-action:manipulation}
+.btn-c:active{transform:scale(.94)}
+.btn-p{flex:2;padding:12px;border-radius:var(--r2);background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;font-size:.88rem;font-weight:700;box-shadow:0 5px 15px rgba(102,126,234,.36);transition:var(--tr);touch-action:manipulation}
+.btn-p:active{transform:scale(.94)}
+.btn-p:disabled{opacity:.4;pointer-events:none}
+
+/* SETTINGS */
+.set-sec{margin-bottom:18px}
+.set-title{font-size:.8rem;font-weight:700;color:var(--mu);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px}
+.set-row{background:var(--sur);border-radius:var(--r2);padding:13px;box-shadow:var(--sh2);margin-bottom:8px}
+.set-row-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.set-row-t{font-size:.9rem;font-weight:700}
+.set-row-s{font-size:.75rem;color:var(--mu);margin-top:2px;line-height:1.5}
+.badge{font-size:.68rem;padding:3px 9px;border-radius:99px;font-weight:700}
+.badge.on{background:rgba(67,233,123,.18);color:#28c76f}
+.badge.off{background:var(--sur2);color:var(--mu)}
+.badge.err{background:rgba(252,92,125,.15);color:var(--dan)}
+.export-row{display:flex;gap:8px}
+.exp-btn{flex:1;padding:11px;border-radius:11px;font-size:.83rem;font-weight:700;text-align:center;transition:var(--tr);touch-action:manipulation}
+.exp-btn:active{transform:scale(.95)}
+.exp-btn.ex{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;box-shadow:0 4px 14px rgba(102,126,234,.35)}
+.exp-btn.im{background:var(--sur2);color:var(--tx2);border:1.5px solid var(--bor)}
+.fb-info{font-size:.74rem;color:var(--mu);line-height:1.6;margin-bottom:10px;background:var(--sur2);border-radius:9px;padding:10px 11px}
+.fb-info a{color:var(--ac)}
+.fb-steps{font-size:.74rem;color:var(--mu);line-height:1.9;padding-left:16px;margin-bottom:10px}
+
+/* STUDY CONFIG */
+.csi-list{display:flex;flex-direction:column;gap:7px;margin-bottom:13px}
+.csi{display:flex;align-items:center;gap:10px;background:var(--sur2);border-radius:10px;padding:10px 12px;cursor:pointer;transition:var(--tr);border:2px solid transparent;touch-action:manipulation}
+.csi:active{transform:scale(.98)}
+.csi.on{border-color:var(--ac);background:rgba(102,126,234,.08)}
+.csi-dot{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.csi-n{flex:1;font-weight:600;font-size:.88rem}
+.csi-c{font-size:.74rem;color:var(--mu)}
+.csi-chk{width:21px;height:21px;border-radius:50%;border:2px solid var(--bor);display:flex;align-items:center;justify-content:center;font-size:.72rem;color:transparent;transition:var(--tr)}
+.csi.on .csi-chk{background:var(--ac);border-color:var(--ac);color:#fff}
+.wc-row{display:flex;align-items:center;gap:11px;background:var(--sur2);border-radius:10px;padding:11px 13px;margin-top:7px}
+.wc-l{flex:1;font-size:.86rem;color:var(--tx2)}
+.wc-ctrl{display:flex;align-items:center;gap:9px}
+.wc-b{width:31px;height:31px;border-radius:50%;background:var(--sur);box-shadow:var(--sh2);font-size:1.1rem;font-weight:700;display:flex;align-items:center;justify-content:center;transition:var(--tr);touch-action:manipulation}
+.wc-b:active{transform:scale(.82)}
+.wc-n{font-size:1.15rem;font-weight:800;min-width:32px;text-align:center;color:var(--ac)}
+.wc-hint{font-size:.7rem;color:var(--mu);text-align:right;margin-top:4px}
+
+/* STUDY SCREEN */
+#s-study{justify-content:flex-start}
+.sp-area{width:100%;max-width:560px;padding:0 14px 7px}
+.sp-inf{display:flex;justify-content:space-between;font-size:.76rem;color:var(--mu);margin-bottom:5px}
+.sp-bar{height:6px;background:var(--sur);border-radius:99px;overflow:hidden;box-shadow:var(--sh2)}
+.sp-fill{height:100%;background:linear-gradient(90deg,var(--ac),var(--ok));border-radius:99px;transition:width .4s ease}
+.sstats{display:flex;gap:6px;width:100%;max-width:560px;padding:0 14px 9px}
+.sst{flex:1;background:var(--sur);border-radius:10px;padding:8px 4px;text-align:center;box-shadow:var(--sh2)}
+.sst .v{font-size:1.15rem;font-weight:800}
+.sst .l{font-size:.62rem;color:var(--mu);margin-top:2px}
+.sst.ok .v{color:var(--ok)}
+.sst.bad .v{color:var(--dan)}
+.sst.rem .v{color:var(--ac)}
+
+/* CARD */
+.s-scene{width:100%;max-width:560px;padding:0 14px;perspective:1100px;flex:1;display:flex;align-items:center;justify-content:center}
+.cwrap{width:100%;max-width:440px;aspect-ratio:3/2;position:relative;user-select:none}
+.cswipe{width:100%;height:100%;will-change:transform}
+.cflip{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .56s cubic-bezier(.4,0,.2,1);will-change:transform}
+.cflip.fp{transform:rotateY(180deg)}
+.cface{position:absolute;inset:0;border-radius:var(--r);box-shadow:var(--sh);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;-webkit-backface-visibility:hidden;backface-visibility:hidden}
+.cback{pointer-events:none}
+.cflip.fp .cfront{pointer-events:none}
+.cflip.fp .cback{pointer-events:auto}
+.cfront{background:linear-gradient(145deg,var(--sur),var(--sur2))}
+.cback{transform:rotateY(180deg);background:linear-gradient(145deg,rgba(102,126,234,.1),rgba(118,75,162,.13))}
+[data-theme=dark] .cback{background:linear-gradient(145deg,rgba(102,126,234,.2),rgba(118,75,162,.22))}
+.cbadge{position:absolute;top:10px;left:50%;transform:translateX(-50%);font-size:.61rem;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--mu);background:var(--bg);padding:3px 8px;border-radius:99px;white-space:nowrap}
+.cspk{position:absolute;top:9px;right:10px;width:37px;height:37px;border-radius:50%;background:linear-gradient(135deg,var(--ac),var(--ac2));display:flex;align-items:center;justify-content:center;box-shadow:0 4px 13px rgba(102,126,234,.43);touch-action:manipulation;-webkit-tap-highlight-color:transparent;z-index:5}
+.cspk svg,.cspk *{pointer-events:none}
+.cword{font-size:clamp(1.7rem,7.5vw,2.6rem);font-weight:800;letter-spacing:-.5px;text-align:center;margin-bottom:6px}
+.cipa{font-size:.9rem;font-style:italic;font-weight:700;color:var(--tx2);letter-spacing:.4px}
+.chint{position:absolute;bottom:10px;font-size:.65rem;color:var(--mu);opacity:.45;pointer-events:none}
+.cm-lbl{font-size:.63rem;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--ac);margin-bottom:7px}
+.cmeaning{font-size:clamp(1.1rem,4vw,1.5rem);font-weight:700;text-align:center;line-height:1.4;margin-bottom:8px}
+.cexample{font-size:.78rem;color:var(--tx2);font-weight:600;font-style:italic;text-align:center;line-height:1.6}
+.sov{position:absolute;inset:0;border-radius:var(--r);pointer-events:none;opacity:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;z-index:3}
+.ovl{background:rgba(252,92,125,.22);color:#fc5c7d}
+.ovr{background:rgba(67,233,123,.2);color:#28c76f}
+
+.sacts{display:flex;gap:11px;width:100%;max-width:560px;padding:13px 14px 5px}
+.sbtn{flex:1;padding:14px 7px;border-radius:14px;display:flex;flex-direction:column;align-items:center;gap:3px;font-weight:700;font-size:.88rem;color:#fff;transition:var(--tr);touch-action:manipulation}
+.sbtn:active{transform:scale(.93)}
+.sbtn .si{font-size:1.2rem}
+.sbtn .ss{font-size:.66rem;opacity:.8}
+.sbtn.forgot{background:linear-gradient(135deg,#fc5c7d,#e84393);box-shadow:0 6px 18px rgba(252,92,125,.36)}
+.sbtn.ok{background:linear-gradient(135deg,#43e97b,#38f9d7);box-shadow:0 6px 18px rgba(67,233,123,.36)}
+.kbhint{font-size:.65rem;color:var(--mu);opacity:.38;text-align:center;padding-bottom:18px}
+
+/* DONE */
+.done-card{background:var(--sur);border-radius:var(--r);padding:26px 20px;box-shadow:var(--sh);text-align:center;margin:14px;width:calc(100% - 28px);max-width:532px}
+.done-em{font-size:3.8rem;margin-bottom:11px;display:block;animation:bo .7s ease infinite alternate}
+@keyframes bo{from{transform:translateY(0)}to{transform:translateY(-9px)}}
+.done-t{font-size:1.4rem;font-weight:800;margin-bottom:7px}
+.done-s{color:var(--mu);line-height:1.7;font-size:.86rem;margin-bottom:16px}
+.dfl-t{font-size:.76rem;font-weight:700;color:var(--dan);text-transform:uppercase;letter-spacing:1px;text-align:left;margin-bottom:6px}
+.dfl{background:var(--sur2);border-radius:9px;padding:9px 11px;margin-bottom:5px;font-size:.84rem;text-align:left}
+.done-btns{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.done-btn{width:100%;padding:12px;border-radius:12px;font-size:.9rem;font-weight:700;transition:var(--tr);touch-action:manipulation}
+.done-btn:active{transform:scale(.97)}
+.done-btn.pri{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;box-shadow:0 5px 17px rgba(102,126,234,.36)}
+.done-btn.sec{background:var(--sur2);color:var(--tx2)}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--sur);color:var(--tx);padding:10px 19px;border-radius:99px;box-shadow:var(--sh);font-size:.82rem;font-weight:600;transition:transform .36s cubic-bezier(.4,0,.2,1);z-index:9999;white-space:nowrap;max-width:86vw;overflow:hidden;text-overflow:ellipsis}
+.toast.on{transform:translateX(-50%) translateY(0)}
+
+/* HIDDEN FILE INPUT */
+#imp-file{display:none}
+
+@media(max-width:360px){.cword{font-size:1.6rem}.sbtn{padding:11px 4px}}
+@media(max-height:650px){.cwrap{aspect-ratio:3/1.8}}
+</style>
+</head>
+<body>
+<input type="file" id="imp-file" accept=".json">
+<div class="toast" id="toast"></div>
+
+<!-- ══ HOME ══ -->
+<div id="s-home" class="scr on">
+  <div class="tbar">
+    <div class="tbar-title grad">✦ FlashCard Pro</div>
+    <div class="sync-dot off" id="syncDot" title="Trạng thái đồng bộ"></div>
+    <button class="ico-btn" id="settingsBtn" title="Cài đặt">⚙️</button>
+    <button class="ico-btn" id="themeBtnH">🌙</button>
+  </div>
+  <div class="cont">
+    <div class="hero" id="heroBtn">
+      <div><h2>Bắt đầu ôn tập 🚀</h2><p id="heroSub">Chọn danh mục và số từ</p></div>
+      <span>📖</span>
+    </div>
+    <div class="sec-hdr">
+      <div class="sec-t">📚 Danh mục từ vựng</div>
+      <button class="chip" id="addCatBtn">＋ Thêm mục</button>
+    </div>
+    <div class="cat-list" id="catList"></div>
+    <div class="empty" id="homeEmpty" style="display:none">
+      <div class="ei">📖</div><div class="et">Chưa có danh mục nào</div>
+      <div class="es">Nhấn "＋ Thêm mục" để bắt đầu!</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CATEGORY ══ -->
+<div id="s-cat" class="scr">
+  <div class="tbar">
+    <button class="ico-btn" id="backCat">←</button>
+    <div class="tbar-title" id="catTitle">Danh mục</div>
+    <button class="ico-btn" id="themeBtnC">🌙</button>
+  </div>
+  <div class="cont">
+    <div class="mstats">
+      <div class="mst tot"><div class="v" id="csT">0</div><div class="l">Tổng từ</div></div>
+      <div class="mst ok"> <div class="v" id="csO">0</div><div class="l">Đã nhớ ✓</div></div>
+      <div class="mst bad"><div class="v" id="csB">0</div><div class="l">Cần ôn ↩</div></div>
+    </div>
+    <button class="add-w-btn" id="addWordBtn">＋ Thêm từ / cụm từ / câu</button>
+    <div class="wlist" id="wlist"></div>
+    <div class="empty" id="wEmpty" style="display:none">
+      <div class="ei">✏️</div><div class="et">Chưa có từ nào</div>
+      <div class="es">Nhấn nút trên để thêm từ đầu tiên!</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STUDY ══ -->
+<div id="s-study" class="scr">
+  <div class="tbar">
+    <button class="ico-btn" id="backStudy">←</button>
+    <div class="tbar-title" id="studyTitle">Ôn tập</div>
+    <button class="ico-btn" id="themeBtnS">🌙</button>
+  </div>
+  <div class="sp-area" id="sProg">
+    <div class="sp-inf"><span id="spTxt">Thẻ 1/10</span><span id="spPct">0%</span></div>
+    <div class="sp-bar"><div class="sp-fill" id="spFill" style="width:0%"></div></div>
+  </div>
+  <div class="sstats" id="sStats">
+    <div class="sst ok"> <div class="v" id="ssOk">0</div>  <div class="l">Đã nhớ ✓</div></div>
+    <div class="sst bad"><div class="v" id="ssFail">0</div><div class="l">Cần ôn ↩</div></div>
+    <div class="sst rem"><div class="v" id="ssRem">0</div> <div class="l">Còn lại</div></div>
+  </div>
+  <div class="s-scene" id="sScene">
+    <div class="cwrap" id="cwrap">
+      <div class="cswipe" id="cswipe">
+        <div class="cflip" id="cflip">
+          <div class="cface cfront">
+            <span class="cbadge">Tiếng Anh · Nhấn để xem nghĩa</span>
+            <button class="cspk" id="spkBtn">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="#fff"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+            </button>
+            <div class="cword" id="cWord">—</div>
+            <div class="cipa"  id="cIpa"></div>
+            <div class="chint">Nhấn thẻ để xem nghĩa →</div>
+          </div>
+          <div class="cface cback">
+            <span class="cbadge">Nghĩa · Nhấn để quay lại</span>
+            <div class="cm-lbl">NGHĨA</div>
+            <div class="cmeaning"  id="cMeaning">—</div>
+            <div class="cexample" id="cExample"></div>
+            <div class="chint">← Nhấn để quay lại</div>
+          </div>
+        </div>
+      </div>
+      <div class="sov ovl" id="ovL">✕ Quên</div>
+      <div class="sov ovr" id="ovR">✓ Nhớ!</div>
+    </div>
+  </div>
+  <div class="sacts" id="sActs">
+    <button class="sbtn forgot" id="btnFail"><span class="si">✕</span><span>Quên rồi</span><span class="ss">← Vuốt trái</span></button>
+    <button class="sbtn ok"     id="btnOk">  <span class="si">✓</span><span>Đã nhớ!</span><span class="ss">Vuốt phải →</span></button>
+  </div>
+  <div class="kbhint" id="kbhint">← Quên · → Nhớ · Space Lật · S Phát âm</div>
+  <div class="done-card" id="doneCard" style="display:none">
+    <span class="done-em">🎉</span>
+    <div class="done-t">Hoàn thành!</div>
+    <div class="done-s" id="doneSub"></div>
+    <div id="doneFl"></div>
+    <div class="done-btns">
+      <button class="done-btn pri" id="doneRetry">🔄 Ôn lại từ đã quên</button>
+      <button class="done-btn sec" id="doneHome">← Về trang chủ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: CATEGORY ══ -->
+<div id="mCat" class="mov">
+  <div class="mbox">
+    <div class="mh"></div>
+    <div class="mt" id="mCatT">Thêm danh mục mới</div>
+    <div class="fg"><label class="fl">Tên danh mục *</label>
+      <input class="fi" id="fCN" type="text" placeholder="VD: Chuyên ngành IT, IELTS, Đời sống..."></div>
+    <div class="fg"><label class="fl">Biểu tượng</label><div class="emoji-row" id="ePick"></div></div>
+    <div class="fg"><label class="fl">Màu sắc</label><div class="clr-row" id="cPick"></div></div>
+    <div class="mfoot"><button class="btn-c" id="mCatX">Hủy</button><button class="btn-p" id="mCatS">💾 Lưu</button></div>
+  </div>
+</div>
+
+<!-- ══ MODAL: WORD ══ -->
+<div id="mWord" class="mov">
+  <div class="mbox">
+    <div class="mh"></div>
+    <div class="mt" id="mWordT">Thêm từ mới</div>
+    <div class="fg">
+      <label class="fl">Từ / Cụm từ / Câu * <span class="ai-tag">✦ AI</span></label>
+      <div class="fi-row">
+        <input class="fi" id="fW" type="text" placeholder="VD: Algorithm / break a leg...">
+        <button class="ai-btn" id="aiBtn" title="AI tự động tra từ">✦</button>
+      </div>
+    </div>
+    <div class="ai-ldr" id="aiLdr"><div class="spin"></div><span>AI đang tra từ...</span></div>
+    <div class="fg"><label class="fl">Phiên âm IPA <span class="auto-lbl" id="ipaAl">✦ AI</span></label>
+      <input class="fi" id="fIpa" type="text" placeholder="Để trống → AI tự điền"></div>
+    <div class="fg"><label class="fl">Nghĩa tiếng Việt * <span class="auto-lbl" id="meanAl">✦ AI</span></label>
+      <input class="fi" id="fM" type="text" placeholder="Để trống → AI tự điền"></div>
+    <div class="fg"><label class="fl">Câu ví dụ <span class="auto-lbl" id="exAl">✦ AI</span></label>
+      <textarea class="fi" id="fEx" placeholder="Để trống → AI tự điền"></textarea></div>
+    <div class="mfoot"><button class="btn-c" id="mWordX">Hủy</button><button class="btn-p" id="mWordS">💾 Lưu</button></div>
+  </div>
+</div>
+
+<!-- ══ MODAL: STUDY CONFIG ══ -->
+<div id="mStudy" class="mov">
+  <div class="mbox">
+    <div class="mh"></div>
+    <div class="mt">🎯 Cài đặt ôn tập</div>
+    <div class="fg">
+      <label class="fl">Chọn danh mục</label>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:.8rem">
+        <span id="selInfo" style="color:var(--mu)">Chưa chọn</span>
+        <button style="font-size:.79rem;font-weight:700;color:var(--ac);touch-action:manipulation" id="selAllBtn">Chọn tất cả</button>
+      </div>
+      <div class="csi-list" id="csiList"></div>
+    </div>
+    <div class="fg">
+      <label class="fl">Số từ ngẫu nhiên</label>
+      <div class="wc-row">
+        <span class="wc-l">Số thẻ muốn ôn</span>
+        <div class="wc-ctrl">
+          <button class="wc-b" id="wcM">−</button>
+          <span class="wc-n" id="wcN">10</span>
+          <button class="wc-b" id="wcP">＋</button>
+        </div>
+      </div>
+      <div class="wc-hint" id="wcHint">Tối đa: 0 từ</div>
+    </div>
+    <div class="mfoot"><button class="btn-c" id="mStudyX">Hủy</button><button class="btn-p" id="mStudyGo">▶ Bắt đầu</button></div>
+  </div>
+</div>
+
+<!-- ══ MODAL: SETTINGS ══ -->
+<div id="mSet" class="mov">
+  <div class="mbox">
+    <div class="mh"></div>
+    <div class="mt">⚙️ Cài đặt</div>
+
+    <!-- AI -->
+    <div class="set-sec">
+      <div class="set-title">✦ AI tự động tra từ</div>
+      <div class="set-row">
+        <div class="set-row-hdr">
+          <div>
+            <div class="set-row-t">Anthropic API Key</div>
+            <div class="set-row-s">Lấy miễn phí tại <a href="https://console.anthropic.com" target="_blank" style="color:var(--ac)">console.anthropic.com</a><br>Lưu trên máy bạn, không gửi đi đâu khác</div>
+          </div>
+          <span class="badge" id="aiKeyBadge">off</span>
+        </div>
+        <input class="fi" id="sApiKey" type="password" placeholder="sk-ant-...">
+        <div class="mfoot" style="margin-top:10px">
+          <button class="btn-c" id="aiKeyClear">Xóa key</button>
+          <button class="btn-p" id="aiKeySave">💾 Lưu key</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SYNC -->
+    <div class="set-sec">
+      <div class="set-title">☁ Đồng bộ Firebase (miễn phí)</div>
+      <div class="set-row">
+        <div class="set-row-hdr">
+          <div>
+            <div class="set-row-t">Firebase Config</div>
+            <div class="set-row-s" id="fbStatus">Chưa cài đặt — dữ liệu lưu cục bộ</div>
+          </div>
+          <span class="badge off" id="fbBadge">off</span>
+        </div>
+        <div class="fb-info">
+          📋 <b>Cách tạo Firebase miễn phí (5 phút):</b>
+        </div>
+        <ol class="fb-steps">
+          <li>Vào <a href="https://console.firebase.google.com" target="_blank" style="color:var(--ac)">console.firebase.google.com</a></li>
+          <li>Tạo project mới → chọn <b>Realtime Database</b></li>
+          <li>Bật mode <b>Test</b> (để đọc/ghi)</li>
+          <li>Vào Project Settings → copy <b>databaseURL</b></li>
+        </ol>
+        <input class="fi" id="sFbUrl" type="text" placeholder="https://your-project-default-rtdb.firebaseio.com" style="margin-bottom:10px">
+        <div class="mfoot" style="margin-top:0">
+          <button class="btn-c" id="fbClear">Xóa</button>
+          <button class="btn-p" id="fbSave">☁ Kết nối</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPORT / IMPORT -->
+    <div class="set-sec">
+      <div class="set-title">📦 Sao lưu dữ liệu</div>
+      <div class="set-row">
+        <div class="set-row-t" style="margin-bottom:5px">Export / Import JSON</div>
+        <div class="set-row-s" style="margin-bottom:11px">Xuất file JSON → chuyển sang điện thoại → Import để đồng bộ thủ công</div>
+        <div class="export-row">
+          <button class="exp-btn ex" id="exportBtn">📤 Export</button>
+          <button class="exp-btn im" id="importBtn">📥 Import</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-p" style="width:100%;padding:13px;border-radius:var(--r2)" id="mSetX">Đóng</button>
+  </div>
+</div>
+
+<!-- Firebase SDK (lazy loaded) -->
+<script>
+/* ================================================================
+   CONFIG
+================================================================ */
+const LS      = 'fc_data_v1';
+const TK      = 'fc_theme';
+const AK      = 'fc_apikey';
+const FK      = 'fc_firebase_url';
+const FB_PATH = 'flashcard_pro/data';
+const REP     = 3;
+const COLORS  = ['#667eea','#f093fb','#4facfe','#43e97b','#fa709a','#f6d365','#a18cd1','#fd7f6f'];
+const EMOJIS  = ['📚','💻','🌍','🔬','💼','🏃','🎵','🍜','✈️','🏥','🎓','💬','🎯','🔑','📝','⚡'];
+
+const DEF = {categories:[
+  {id:'c1',name:'Từ vựng mẫu',emoji:'📚',color:'#667eea',words:[
+    {id:'w1',word:'Ambiguous',ipa:'/æmˈbɪɡjuəs/',meaning:'Mơ hồ, không rõ ràng',example:'The contract terms were ambiguous.',fc:0,rc:0},
+    {id:'w2',word:'Perseverance',ipa:'/ˌpɜːrsɪˈvɪərəns/',meaning:'Sự kiên trì, bền bỉ',example:'Perseverance leads to success.',fc:0,rc:0},
+    {id:'w3',word:'Eloquent',ipa:'/ˈɛləkwənt/',meaning:'Hùng hồn, lưu loát',example:'She gave an eloquent speech.',fc:0,rc:0},
+  ]},
+  {id:'c2',name:'Công nghệ IT',emoji:'💻',color:'#4facfe',words:[
+    {id:'w4',word:'Algorithm',ipa:'/ˈælɡərɪðəm/',meaning:'Thuật toán',example:'A good algorithm makes code efficient.',fc:0,rc:0},
+    {id:'w5',word:'Deployment',ipa:'/dɪˈplɔɪmənt/',meaning:'Triển khai phần mềm',example:'The deployment went live without errors.',fc:0,rc:0},
+  ]},
+]};
+
+/* ================================================================
+   STATE
+================================================================ */
+let D={categories:[]};
+let curCat=-1, editCat=-1, editWord=-1;
+let selClr=COLORS[0], selEmo=EMOJIS[0];
+let deck=[],dI=0,dOk=0,dFail=0,flipped=false,sessionFl=[];
+let cfgSel=new Set(), cfgN=10;
+let fbUrl='', apiKey='';
+let fbTimer=null;
+
+/* ================================================================
+   LOCAL STORAGE
+================================================================ */
+const lsave = () => { try{localStorage.setItem(LS,JSON.stringify(D))}catch(e){} };
+function lload() {
+  try { const r=localStorage.getItem(LS); if(r){D=JSON.parse(r);return;} } catch(e){}
+  D=JSON.parse(JSON.stringify(DEF)); lsave();
+}
+
+/* ================================================================
+   FIREBASE REST API  (no SDK needed — pure fetch)
+   Using Firebase Realtime Database REST API
+================================================================ */
+function fbEnabled(){ return !!fbUrl; }
+
+async function fbRead() {
+  if (!fbEnabled()) return null;
+  try {
+    setSyncDot('ing');
+    const r = await fetch(`${fbUrl.replace(/\/$/,'')}/${FB_PATH}.json`);
+    if (!r.ok) throw new Error(r.status);
+    const json = await r.json();
+    setSyncDot('on');
+    return json;
+  } catch(e) { setSyncDot('err'); return null; }
+}
+
+async function fbWrite(data) {
+  if (!fbEnabled()) return;
+  clearTimeout(fbTimer);
+  setSyncDot('ing');
+  fbTimer = setTimeout(async ()=>{
+    try {
+      const r = await fetch(`${fbUrl.replace(/\/$/,'')}/${FB_PATH}.json`, {
+        method:'PUT',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(data)
+      });
+      if (!r.ok) throw new Error(r.status);
+      setSyncDot('on');
+    } catch(e){ setSyncDot('err'); toast('⚠️ Lỗi đồng bộ Firebase!'); }
+  }, 1000);
+}
+
+/* Save to both localStorage + Firebase */
+function save() {
+  lsave();
+  if (fbEnabled()) fbWrite(D);
+}
+
+/* ================================================================
+   FIREBASE SETUP
+================================================================ */
+async function fbConnect(url) {
+  if (!url){ toast('⚠️ Nhập Firebase URL!'); return; }
+  fbUrl = url.trim();
+  setSyncDot('ing');
+  try {
+    // Try reading — if null it's first time (empty DB), that's OK
+    const r = await fetch(`${fbUrl.replace(/\/$/,'')}/${FB_PATH}.json`);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const remote = await r.json();
+    if (remote && remote.categories) {
+      D = remote;
+      lsave();
+      toast('☁ Đã kết nối! Dữ liệu tải từ Firebase.');
+    } else {
+      // Push local data to Firebase
+      await fbWrite(D);
+      toast('☁ Đã kết nối! Đẩy dữ liệu lên Firebase.');
+    }
+    localStorage.setItem(FK, fbUrl);
+    setSyncDot('on');
+    updateFbBadge(true);
+    renderHome();
+  } catch(e) {
+    setSyncDot('err');
+    fbUrl='';
+    toast('✕ Không thể kết nối Firebase. Kiểm tra URL!');
+    updateFbBadge(false);
+  }
+}
+
+function fbDisconnect() {
+  fbUrl=''; localStorage.removeItem(FK);
+  setSyncDot('off'); updateFbBadge(false);
+  toast('🔌 Đã ngắt Firebase, dùng lưu cục bộ.');
+}
+
+function updateFbBadge(on) {
+  const b=document.getElementById('fbBadge'), s=document.getElementById('fbStatus');
+  if (on){ b.textContent='on'; b.className='badge on'; s.textContent='Đang đồng bộ — PC + điện thoại cùng URL sẽ sync'; }
+  else   { b.textContent='off'; b.className='badge off'; s.textContent='Chưa cài đặt — dữ liệu lưu cục bộ'; }
+}
+
+function setSyncDot(state) {
+  const d=document.getElementById('syncDot');
+  d.className='sync-dot'+({on:' on',ing:' ing',err:' err',off:' off'}[state]||' off');
+  d.title={on:'☁ Đã đồng bộ Firebase',ing:'⟳ Đang đồng bộ...',err:'✕ Lỗi đồng bộ',off:'💾 Lưu cục bộ'}[state]||'';
+}
+
+/* ================================================================
+   AI AUTO-FILL
+================================================================ */
+async function aiFill() {
+  const word = document.getElementById('fW').value.trim();
+  if (!word){ toast('⚠️ Nhập từ trước!'); return; }
+  if (!apiKey){ toast('⚠️ Chưa có API key! Vào ⚙️ Cài đặt → nhập Anthropic API Key.'); return; }
+
+  const curIpa = document.getElementById('fIpa').value.trim();
+  const curM   = document.getElementById('fM').value.trim();
+  const curEx  = document.getElementById('fEx').value.trim();
+  if (curIpa && curM && curEx){ toast('ℹ️ Tất cả trường đã được điền!'); return; }
+
+  const fields=[];
+  if (!curIpa) fields.push('ipa');
+  if (!curM)   fields.push('meaning_vi');
+  if (!curEx)  fields.push('example');
+
+  const aiBtn=document.getElementById('aiBtn');
+  aiBtn.disabled=true;
+  document.getElementById('aiLdr').classList.add('on');
+  ['fW','fIpa','fM','fEx','mWordS'].forEach(id=>document.getElementById(id).disabled=true);
+
+  const prompt=`You are an English dictionary expert. Word/phrase: "${word}"
+Return ONLY valid JSON (no markdown) with these fields:
+${fields.includes('ipa')?'- "ipa": IPA with slashes\n':''}${fields.includes('meaning_vi')?'- "meaning_vi": Vietnamese meaning (concise)\n':''}${fields.includes('example')?'- "example": one natural example sentence\n':''}No extra text.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:300,messages:[{role:'user',content:prompt}]})
+    });
+    if (!res.ok) throw new Error('API error '+res.status);
+    const data=await res.json();
+    const txt=data.content.map(b=>b.text||'').join('').trim().replace(/^```[a-z]*\n?/,'').replace(/\n?```$/,'');
+    const obj=JSON.parse(txt);
+    let n=0;
+    if (obj.ipa&&!curIpa){document.getElementById('fIpa').value=obj.ipa;document.getElementById('ipaAl').style.display='inline';n++;}
+    if (obj.meaning_vi&&!curM){document.getElementById('fM').value=obj.meaning_vi;document.getElementById('meanAl').style.display='inline';n++;}
+    if (obj.example&&!curEx){document.getElementById('fEx').value=obj.example;document.getElementById('exAl').style.display='inline';n++;}
+    toast(`✦ AI đã điền ${n} trường!`);
+  } catch(e){
+    console.error(e);
+    toast('⚠️ AI lỗi: '+(e.message||'Kiểm tra API key'));
+  } finally {
+    aiBtn.disabled=false;
+    document.getElementById('aiLdr').classList.remove('on');
+    ['fW','fIpa','fM','fEx','mWordS'].forEach(id=>document.getElementById(id).disabled=false);
+  }
+}
+
+/* ================================================================
+   EXPORT / IMPORT JSON
+================================================================ */
+function exportData() {
+  const json=JSON.stringify(D,null,2);
+  const blob=new Blob([json],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url;
+  a.download='flashcard_backup_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click(); URL.revokeObjectURL(url);
+  toast('📤 Đã xuất file JSON!');
+}
+
+function importData(file) {
+  if (!file) return;
+  const r=new FileReader();
+  r.onload=e=>{
+    try {
+      const parsed=JSON.parse(e.target.result);
+      if (!parsed.categories||!Array.isArray(parsed.categories)) throw new Error();
+      D=parsed; save(); renderHome();
+      toast('📥 Import thành công! '+D.categories.length+' danh mục.');
+    } catch{ toast('✕ File không hợp lệ!'); }
+  };
+  r.readAsText(file);
+}
+
+/* ================================================================
+   UTILS
+================================================================ */
+const uid    = ()=>'i'+Math.random().toString(36).slice(2,9);
+const esc    = s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const shuf   = a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=0|Math.random()*(i+1);[b[i],b[j]]=[b[j],b[i]];}return b;};
+
+let _tt;
+function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('on');clearTimeout(_tt);_tt=setTimeout(()=>e.classList.remove('on'),2700);}
+
+const getTheme=()=>localStorage.getItem(TK)||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+function applyTheme(t){document.documentElement.setAttribute('data-theme',t);const i=t==='dark'?'☀️':'🌙';document.querySelectorAll('[id^=themeBtn]').forEach(b=>b.textContent=i);try{localStorage.setItem(TK,t)}catch(e){}}
+const togTheme=()=>applyTheme(getTheme()==='dark'?'light':'dark');
+
+function speak(w){if(!window.speechSynthesis){toast('⚠️ Trình duyệt chưa hỗ trợ TTS');return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(w);u.lang='en-US';u.rate=.88;speechSynthesis.speak(u);}
+
+/* ================================================================
+   SCREENS
+================================================================ */
+const showScr=id=>{document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');};
+const openM=id=>document.getElementById(id).classList.add('on');
+const closeM=id=>document.getElementById(id).classList.remove('on');
+
+/* ── HOME ── */
+function renderHome(){
+  const list=document.getElementById('catList'),empty=document.getElementById('homeEmpty');
+  list.innerHTML='';
+  if(!D.categories.length){empty.style.display='block';document.getElementById('heroSub').textContent='Tạo danh mục đầu tiên!';return;}
+  empty.style.display='none';
+  const tw=D.categories.reduce((s,c)=>s+c.words.length,0);
+  const tf=D.categories.reduce((s,c)=>s+c.words.filter(w=>w.fc>0).length,0);
+  document.getElementById('heroSub').textContent=`${tw} từ · ${tf?tf+' cần ôn lại 🔥':'Tất cả đang tốt 🎉'}`;
+  D.categories.forEach((cat,ci)=>{
+    const bad=cat.words.filter(w=>w.fc>0).length;
+    const d=document.createElement('div');d.className='cat-card';
+    d.innerHTML=`<div class="cdot" style="background:${cat.color}22">${cat.emoji}</div>
+      <div class="ci"><div class="ci-name">${esc(cat.name)}</div>
+      <div class="ci-meta">${cat.words.length} từ${bad?` · <b>↩ ${bad} cần ôn</b>`:''}</div></div>
+      <div class="cacts"><button class="sm-btn" data-e="${ci}">✎</button><button class="sm-btn" data-d="${ci}">🗑</button></div>`;
+    d.addEventListener('click',e=>{if(e.target.dataset.e!==undefined||e.target.dataset.d!==undefined)return;openCat(ci);});
+    d.querySelector('[data-e]').addEventListener('click',ev=>{ev.stopPropagation();openEditCat(ci);});
+    d.querySelector('[data-d]').addEventListener('click',ev=>{ev.stopPropagation();delCat(ci);});
+    list.appendChild(d);
+  });
+}
+
+/* ── CATEGORY ── */
+function openCat(ci){curCat=ci;const c=D.categories[ci];document.getElementById('catTitle').textContent=`${c.emoji} ${c.name}`;renderCat();showScr('s-cat');}
+function renderCat(){
+  const c=D.categories[curCat];if(!c)return;
+  const ok=c.words.filter(w=>w.rc>0).length,bad=c.words.filter(w=>w.fc>0).length;
+  document.getElementById('csT').textContent=c.words.length;
+  document.getElementById('csO').textContent=ok;
+  document.getElementById('csB').textContent=bad;
+  const wl=document.getElementById('wlist'),we=document.getElementById('wEmpty');
+  wl.innerHTML='';
+  if(!c.words.length){we.style.display='block';return;}we.style.display='none';
+  c.words.forEach((w,wi)=>{
+    const d=document.createElement('div');d.className='witem';
+    d.innerHTML=`<div class="wi"><div class="wi-w">${esc(w.word)}</div>${w.ipa?`<div class="wi-ipa">${esc(w.ipa)}</div>`:''}<div class="wi-m">${esc(w.meaning)}</div>${w.fc>0?`<div class="wi-f">↩ Đã quên ${w.fc} lần</div>`:''}</div>
+      <div class="cacts"><button class="sm-btn" data-e="${wi}">✎</button><button class="sm-btn" data-d="${wi}">🗑</button></div>`;
+    d.querySelector('[data-e]').addEventListener('click',()=>openEditWord(wi));
+    d.querySelector('[data-d]').addEventListener('click',()=>delWord(wi));
+    wl.appendChild(d);
+  });
+}
+
+/* ── MODAL CAT ── */
+function buildPick(){
+  const ep=document.getElementById('ePick');ep.innerHTML='';
+  EMOJIS.forEach(em=>{const b=document.createElement('div');b.className='emo'+(em===selEmo?' on':'');b.textContent=em;b.addEventListener('click',()=>{selEmo=em;ep.querySelectorAll('.emo').forEach(x=>x.classList.remove('on'));b.classList.add('on');});ep.appendChild(b);});
+  const cp=document.getElementById('cPick');cp.innerHTML='';
+  COLORS.forEach(c=>{const d=document.createElement('div');d.className='clr'+(c===selClr?' on':'');d.style.background=c;d.addEventListener('click',()=>{selClr=c;cp.querySelectorAll('.clr').forEach(x=>x.classList.remove('on'));d.classList.add('on');});cp.appendChild(d);});
+}
+function openAddCat(){editCat=-1;selClr=COLORS[0];selEmo=EMOJIS[0];document.getElementById('mCatT').textContent='Thêm danh mục mới';document.getElementById('fCN').value='';buildPick();openM('mCat');}
+function openEditCat(ci){editCat=ci;const c=D.categories[ci];selClr=c.color;selEmo=c.emoji;document.getElementById('mCatT').textContent='Sửa danh mục';document.getElementById('fCN').value=c.name;buildPick();openM('mCat');}
+function saveCat(){
+  const name=document.getElementById('fCN').value.trim();
+  if(!name){toast('⚠️ Nhập tên danh mục!');return;}
+  if(editCat===-1){D.categories.push({id:uid(),name,emoji:selEmo,color:selClr,words:[]});toast('✅ Đã thêm danh mục!');}
+  else{const c=D.categories[editCat];c.name=name;c.emoji=selEmo;c.color=selClr;toast('✅ Đã cập nhật!');}
+  save();closeM('mCat');renderHome();
+}
+function delCat(ci){if(!confirm(`Xóa danh mục "${D.categories[ci].name}"?`))return;D.categories.splice(ci,1);save();renderHome();toast('🗑 Đã xóa');}
+
+/* ── MODAL WORD ── */
+function openAddWord(){
+  editWord=-1;document.getElementById('mWordT').textContent='Thêm từ mới';
+  ['fW','fIpa','fM','fEx'].forEach(id=>document.getElementById(id).value='');
+  ['ipaAl','meanAl','exAl'].forEach(id=>document.getElementById(id).style.display='none');
+  openM('mWord');setTimeout(()=>document.getElementById('fW').focus(),350);
+}
+function openEditWord(wi){
+  editWord=wi;const w=D.categories[curCat].words[wi];
+  document.getElementById('mWordT').textContent='Sửa từ';
+  document.getElementById('fW').value=w.word;
+  document.getElementById('fIpa').value=w.ipa||'';
+  document.getElementById('fM').value=w.meaning;
+  document.getElementById('fEx').value=w.example||'';
+  ['ipaAl','meanAl','exAl'].forEach(id=>document.getElementById(id).style.display='none');
+  openM('mWord');
+}
+function saveWord(){
+  const word=document.getElementById('fW').value.trim();
+  const ipa=document.getElementById('fIpa').value.trim();
+  const meaning=document.getElementById('fM').value.trim();
+  const example=document.getElementById('fEx').value.trim();
+  if(!word){toast('⚠️ Nhập từ vựng!');return;}
+  if(!meaning){toast('⚠️ Nhập nghĩa! (Hoặc nhấn ✦ để AI điền)');return;}
+  const cat=D.categories[curCat];
+  if(editWord===-1){cat.words.push({id:uid(),word,ipa,meaning,example,fc:0,rc:0});toast('✅ Đã thêm từ!');}
+  else{const w=cat.words[editWord];w.word=word;w.ipa=ipa;w.meaning=meaning;w.example=example;toast('✅ Đã cập nhật!');}
+  save();closeM('mWord');renderCat();
+}
+function delWord(wi){const cat=D.categories[curCat];if(!confirm(`Xóa "${cat.words[wi].word}"?`))return;cat.words.splice(wi,1);save();renderCat();toast('🗑 Đã xóa từ');}
+
+/* ── STUDY CONFIG ── */
+function openStudyCfg(){
+  if(!D.categories.length){toast('⚠️ Hãy tạo danh mục trước!');return;}
+  if(!D.categories.some(c=>c.words.length)){toast('⚠️ Hãy thêm từ vào danh mục!');return;}
+  cfgSel=new Set(D.categories.filter(c=>c.words.length).map(c=>c.id));
+  cfgN=Math.min(10,cfgMax());renderCSI();updateWC();openM('mStudy');
+}
+const cfgMax=()=>D.categories.filter(c=>cfgSel.has(c.id)).reduce((s,c)=>s+c.words.length,0);
+function renderCSI(){
+  const el=document.getElementById('csiList');el.innerHTML='';
+  D.categories.forEach(cat=>{
+    if(!cat.words.length)return;
+    const d=document.createElement('div');d.className='csi'+(cfgSel.has(cat.id)?' on':'');
+    d.innerHTML=`<div class="csi-dot" style="background:${cat.color}22">${cat.emoji}</div><div class="csi-n">${esc(cat.name)}</div><div class="csi-c">${cat.words.length} từ</div><div class="csi-chk">✓</div>`;
+    d.addEventListener('click',()=>{cfgSel.has(cat.id)?cfgSel.delete(cat.id):cfgSel.add(cat.id);d.classList.toggle('on',cfgSel.has(cat.id));const mx=cfgMax();if(cfgN>mx)cfgN=Math.max(1,mx);updateWC();});
+    el.appendChild(d);
+  });
+}
+function updateWC(){const mx=cfgMax();document.getElementById('wcN').textContent=cfgN;document.getElementById('wcHint').textContent=`Tối đa: ${mx} từ`;document.getElementById('selInfo').textContent=cfgSel.size?`Đã chọn ${cfgSel.size} danh mục`:'Chưa chọn';}
+function startStudy(){
+  if(!cfgSel.size){toast('⚠️ Chọn ít nhất 1 danh mục!');return;}
+  const mx=cfgMax();if(!mx){toast('⚠️ Không có từ!');return;}
+  if(cfgN<1)cfgN=1;if(cfgN>mx)cfgN=mx;
+  let pool=[];D.categories.forEach(c=>{if(cfgSel.has(c.id))c.words.forEach(w=>pool.push({...w,_cid:c.id}));});
+  deck=shuf(pool).slice(0,cfgN);dI=0;dOk=0;dFail=0;sessionFl=[];
+  closeM('mStudy');showScr('s-study');
+  document.getElementById('studyTitle').textContent=`Ôn tập (${deck.length} từ)`;
+  document.getElementById('doneCard').style.display='none';
+  setStudyUI(true);renderCard();refreshSS();
+}
+
+/* ── STUDY ── */
+function setStudyUI(s){const v=s?'':'none';['sProg','sStats','sScene','sActs','kbhint'].forEach(id=>document.getElementById(id).style.display=v);}
+function renderCard(){
+  if(dI>=deck.length){showDone();return;}
+  setFlip(false,true);
+  const w=deck[dI];
+  document.getElementById('cWord').textContent=w.word;
+  document.getElementById('cIpa').textContent=w.ipa||'';
+  document.getElementById('cMeaning').textContent=w.meaning;
+  document.getElementById('cExample').textContent=w.example?`"${w.example}"`:'';
+  refreshProg();
+}
+function refreshProg(){const tot=deck.length,done=Math.min(dI,tot),pct=tot?Math.round(done/tot*100):0;document.getElementById('spTxt').textContent=`Thẻ ${Math.min(dI+1,tot)}/${tot}`;document.getElementById('spPct').textContent=pct+'%';document.getElementById('spFill').style.width=pct+'%';}
+function refreshSS(){document.getElementById('ssOk').textContent=dOk;document.getElementById('ssFail').textContent=dFail;document.getElementById('ssRem').textContent=Math.max(0,deck.length-dI);}
+function handleOk(){if(dI>=deck.length)return;const w=deck[dI];dOk++;bump(w._cid,w.id,'rc');toast('🎉 Đã nhớ từ này!');dI++;renderCard();refreshSS();}
+function handleFail(){if(dI>=deck.length)return;const w=deck[dI];dFail++;bump(w._cid,w.id,'fc');if(!sessionFl.find(x=>x.id===w.id))sessionFl.push({...w});deck.splice(Math.min(dI+REP+1,deck.length),0,{...w});toast('↩ Sẽ ôn lại sau!');dI++;renderCard();refreshSS();}
+function bump(catId,wId,f){const c=D.categories.find(x=>x.id===catId);if(!c)return;const w=c.words.find(x=>x.id===wId);if(!w)return;w[f]++;save();}
+function setFlip(v,instant=false){flipped=v;const el=document.getElementById('cflip');if(instant){el.style.transition='none';setTimeout(()=>el.style.transition='',50);}v?el.classList.add('fp'):el.classList.remove('fp');}
+function togFlip(){setFlip(!flipped);}
+function showDone(){
+  setStudyUI(false);
+  const dc=document.getElementById('doneCard');dc.style.display='block';
+  const tot=dOk+dFail,acc=tot?Math.round(dOk/tot*100):0;
+  document.getElementById('doneSub').innerHTML=`Ôn <strong>${deck.length}</strong> thẻ · <strong>${dOk}</strong> nhớ · <strong>${dFail}</strong> lần quên<br>Độ chính xác: <strong>${acc}%</strong> 🎯`;
+  const fa=document.getElementById('doneFl');fa.innerHTML='';
+  if(sessionFl.length){fa.innerHTML=`<div class="dfl-t">↩ Từ cần ôn thêm (${sessionFl.length})</div>`;sessionFl.forEach(w=>{const d=document.createElement('div');d.className='dfl';d.innerHTML=`<strong>${esc(w.word)}</strong> — <span style="color:var(--mu)">${esc(w.meaning)}</span>`;fa.appendChild(d);});}
+  document.getElementById('doneRetry').style.display=sessionFl.length?'block':'none';
+}
+
+/* ================================================================
+   TOUCH — Android/MIUI fixed
+================================================================ */
+function initTouch(){
+  const wrap=document.getElementById('cwrap'),sw=document.getElementById('cswipe');
+  const spk=document.getElementById('spkBtn');
+  const ovL=document.getElementById('ovL'),ovR=document.getElementById('ovR');
+  const TH=72;
+  let tx0,ty0,txC,tyC,moved,isH,active;
+  spk.addEventListener('touchstart',e=>e.stopPropagation(),{passive:true});
+  spk.addEventListener('touchend',e=>{e.stopPropagation();e.preventDefault();if(dI<deck.length)speak(deck[dI].word);},{passive:false});
+  wrap.addEventListener('touchstart',e=>{const t=e.touches[0];tx0=txC=t.clientX;ty0=tyC=t.clientY;moved=false;isH=false;active=true;sw.style.transition='none';},{passive:true});
+  wrap.addEventListener('touchmove',e=>{if(!active)return;const t=e.touches[0];txC=t.clientX;tyC=t.clientY;const dx=txC-tx0,dy=tyC-ty0,ax=Math.abs(dx),ay=Math.abs(dy);if(!moved&&(ax>7||ay>7)){moved=true;isH=ax>ay;}if(isH){e.preventDefault();const p=Math.min(Math.abs(dx)/TH,1);sw.style.transform=`translateX(${dx*.3}px) rotate(${dx*.016}deg)`;ovL.style.opacity=dx<0?p*.9:0;ovR.style.opacity=dx>0?p*.9:0;}},{passive:false});
+  wrap.addEventListener('touchend',e=>{if(!active)return;active=false;const dx=txC-tx0,ax=Math.abs(dx);sw.style.transition='transform .26s ease';sw.style.transform='';ovL.style.opacity=0;ovR.style.opacity=0;e.preventDefault();if(!moved||ax<10){togFlip();}else if(isH&&ax>=TH){setTimeout(()=>{dx<0?handleFail():handleOk();},100);}},{passive:false});
+  wrap.addEventListener('click',e=>{if(e.target===spk||spk.contains(e.target))return;togFlip();});
+}
+
+/* ================================================================
+   SETTINGS INIT
+================================================================ */
+function initSettings(){
+  apiKey=localStorage.getItem(AK)||'';
+  fbUrl=localStorage.getItem(FK)||'';
+  if(apiKey){document.getElementById('sApiKey').value=apiKey;document.getElementById('aiKeyBadge').textContent='on';document.getElementById('aiKeyBadge').className='badge on';}
+  if(fbUrl){document.getElementById('sFbUrl').value=fbUrl;updateFbBadge(true);setSyncDot('on');}
+  else setSyncDot('off');
+}
+
+/* ================================================================
+   BIND
+================================================================ */
+function bind(){
+  document.querySelectorAll('[id^=themeBtn]').forEach(b=>b.addEventListener('click',togTheme));
+  document.getElementById('heroBtn').addEventListener('click',openStudyCfg);
+  document.getElementById('addCatBtn').addEventListener('click',openAddCat);
+  document.getElementById('settingsBtn').addEventListener('click',()=>openM('mSet'));
+  document.getElementById('backCat').addEventListener('click',()=>{showScr('s-home');renderHome();});
+  document.getElementById('addWordBtn').addEventListener('click',openAddWord);
+  document.getElementById('backStudy').addEventListener('click',()=>{showScr('s-home');renderHome();});
+  document.getElementById('btnFail').addEventListener('click',handleFail);
+  document.getElementById('btnOk').addEventListener('click',handleOk);
+  document.getElementById('doneHome').addEventListener('click',()=>{showScr('s-home');renderHome();});
+  document.getElementById('doneRetry').addEventListener('click',()=>{if(!sessionFl.length)return;deck=shuf([...sessionFl]);dI=0;dOk=0;dFail=0;sessionFl=[];document.getElementById('doneCard').style.display='none';document.getElementById('studyTitle').textContent=`Ôn lại (${deck.length} từ)`;setStudyUI(true);renderCard();refreshSS();});
+  document.getElementById('spkBtn').addEventListener('click',e=>{e.stopPropagation();if(dI<deck.length)speak(deck[dI].word);});
+
+  // Cat modal
+  document.getElementById('mCatS').addEventListener('click',saveCat);
+  document.getElementById('mCatX').addEventListener('click',()=>closeM('mCat'));
+  document.getElementById('mCat').addEventListener('click',e=>{if(e.target===e.currentTarget)closeM('mCat');});
+
+  // Word modal
+  document.getElementById('aiBtn').addEventListener('click',aiFill);
+  document.getElementById('mWordS').addEventListener('click',saveWord);
+  document.getElementById('mWordX').addEventListener('click',()=>closeM('mWord'));
+  document.getElementById('mWord').addEventListener('click',e=>{if(e.target===e.currentTarget)closeM('mWord');});
+  [['fW','fIpa'],['fIpa','fM'],['fM','fEx']].forEach(([a,b])=>document.getElementById(a).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById(b).focus();}}));
+
+  // Study modal
+  document.getElementById('mStudyX').addEventListener('click',()=>closeM('mStudy'));
+  document.getElementById('mStudyGo').addEventListener('click',startStudy);
+  document.getElementById('mStudy').addEventListener('click',e=>{if(e.target===e.currentTarget)closeM('mStudy');});
+  document.getElementById('selAllBtn').addEventListener('click',()=>{const all=D.categories.filter(c=>c.words.length),allSel=all.every(c=>cfgSel.has(c.id));allSel?cfgSel.clear():all.forEach(c=>cfgSel.add(c.id));renderCSI();const mx=cfgMax();if(cfgN>mx)cfgN=Math.max(1,mx);updateWC();});
+  document.getElementById('wcM').addEventListener('click',()=>{if(cfgN>1){cfgN--;updateWC();}});
+  document.getElementById('wcP').addEventListener('click',()=>{if(cfgN<cfgMax()){cfgN++;updateWC();}});
+
+  // Settings
+  document.getElementById('mSetX').addEventListener('click',()=>closeM('mSet'));
+  document.getElementById('mSet').addEventListener('click',e=>{if(e.target===e.currentTarget)closeM('mSet');});
+  document.getElementById('aiKeySave').addEventListener('click',()=>{
+    const k=document.getElementById('sApiKey').value.trim();
+    if(!k){toast('⚠️ Nhập API key!');return;}
+    apiKey=k;localStorage.setItem(AK,k);
+    document.getElementById('aiKeyBadge').textContent='on';document.getElementById('aiKeyBadge').className='badge on';
+    toast('✅ Đã lưu API key!');
+  });
+  document.getElementById('aiKeyClear').addEventListener('click',()=>{apiKey='';localStorage.removeItem(AK);document.getElementById('sApiKey').value='';document.getElementById('aiKeyBadge').textContent='off';document.getElementById('aiKeyBadge').className='badge off';toast('🗑 Đã xóa API key');});
+  document.getElementById('fbSave').addEventListener('click',()=>fbConnect(document.getElementById('sFbUrl').value.trim()));
+  document.getElementById('fbClear').addEventListener('click',()=>{document.getElementById('sFbUrl').value='';fbDisconnect();});
+  document.getElementById('exportBtn').addEventListener('click',exportData);
+  document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('imp-file').click());
+  document.getElementById('imp-file').addEventListener('change',e=>{importData(e.target.files[0]);e.target.value='';});
+
+  // Keyboard
+  document.addEventListener('keydown',e=>{
+    if(document.querySelector('.scr.on')?.id!=='s-study')return;
+    if(document.querySelector('.mov.on'))return;
+    switch(e.key){case'ArrowLeft':handleFail();break;case'ArrowRight':handleOk();break;case' ':e.preventDefault();togFlip();break;case's':case'S':if(dI<deck.length)speak(deck[dI].word);break;}
+  });
+}
+
+/* ================================================================
+   INIT
+================================================================ */
+function init(){
+  applyTheme(getTheme());
+  lload();
+  initSettings();
+  renderHome();
+  bind();
+  initTouch();
+}
+init();
+</script>
+</body>
+</html>
